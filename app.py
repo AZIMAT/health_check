@@ -12,9 +12,9 @@ health_status = True
 @app.route("/health")
 def health():
     conn = httplib.HTTPSConnection("radiojavan.com", timeout=5)
-    bashCommand = "yes q | docker exec -i any-pass occtl -j show events > userx.json | head -n-3 userx.json > user.json"
+    bashCommand = "yes q | docker exec -i any-pass occtl -j show events > userx.json; head -n-3 userx.json > user.json"
     subprocess.run(bashCommand, shell=True)
-    time.sleep(2)
+    time.sleep(1)
 
     # read file
     with open("user.json", "r") as myfile:
