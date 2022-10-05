@@ -1,13 +1,35 @@
 from flask import Flask, jsonify
 import http.client as httplib
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import time
 import subprocess
 import json
 
 app = Flask(__name__)
 
-health_status = True
+VPNSERVER = os.getenv('VPNSERVER')
+VPNUSER = os.getenv('VPNUSER')
+VPNPASS = os.getenv('VPNPASS')
 
+@app.route("/refresh")
+def refresh():
+    try:
+        bashCommand = 'sudo kill -2 $(cat "$HOME/.openconnect.pid") && rm -f "$HOME/.openconnect.pid"'
+        subprocess.run(bashCommand, shell=True)
+        time.sleep(1)
+
+        bashCommand = f"(echo 'yes'; sleep 1 ;echo '{VPNPASS}') | sudo openconnect {VPNSERVER} --background --pid-file=$HOME/.openconnect.pid --no-dtls --user={VPNUSER}"
+        subprocess.run(bashCommand, shell=True)
+
+        resp = jsonify(refresh=1)
+        resp.status_code = 200
+    except Exception:
+        resp = jsonify(refresh=2)
+        resp.status_code = 500
+
+    return resp
 
 @app.route("/health")
 def health():
