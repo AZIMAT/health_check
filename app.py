@@ -9,26 +9,29 @@ import json
 
 app = Flask(__name__)
 
+
 VPNSERVER = os.getenv('VPNSERVER')
+VPNCERT = os.getenv('VPNCERT')
 VPNUSER = os.getenv('VPNUSER')
 VPNPASS = os.getenv('VPNPASS')
 
+print(VPNCERT)
+
 @app.route("/refresh")
 def refresh():
+    conn = httplib.HTTPSConnection("radiojavan.com", timeout=5)
     try:
+        conn.request("HEAD", "/")
+        resp = jsonify(connect=1)
+        resp.status_code = 200
+    except Exception:
         bashCommand = 'sudo kill -2 $(cat "$HOME/.openconnect.pid") && rm -f "$HOME/.openconnect.pid"'
         subprocess.run(bashCommand, shell=True)
         time.sleep(1)
-
-        bashCommand = f"(echo 'yes'; sleep 1 ;echo '{VPNPASS}') | sudo openconnect {VPNSERVER} --background --pid-file=$HOME/.openconnect.pid --no-dtls --user={VPNUSER}"
+        bashCommand = f"(sleep 15 ; echo '{VPNPASS}') | sudo openconnect {VPNSERVER}:4321 --background --servercert {VPNCERT} --pid-file=$HOME/.openconnect.pid --no-dtls --user={VPNUSER} --passwd-on-stdin"
         subprocess.run(bashCommand, shell=True)
-
-        resp = jsonify(refresh=1)
+        resp = jsonify(connect=2)
         resp.status_code = 200
-    except Exception:
-        resp = jsonify(refresh=2)
-        resp.status_code = 500
-
     return resp
 
 @app.route("/health")
@@ -46,7 +49,6 @@ def health():
     obj = json.loads(data)
     print(len(obj))
     try:
-
         conn.request("HEAD", "/")
         resp = jsonify(health=1, online=len(obj))
         resp.status_code = 200
