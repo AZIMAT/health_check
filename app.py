@@ -14,6 +14,7 @@ VPNSERVER = os.getenv('VPNSERVER')
 VPNCERT = os.getenv('VPNCERT')
 VPNUSER = os.getenv('VPNUSER')
 VPNPASS = os.getenv('VPNPASS')
+VPNCMD = os.getenv('COMMAND')
 
 print(VPNCERT)
 
@@ -25,10 +26,12 @@ def refresh():
         resp = jsonify(connect=1)
         resp.status_code = 200
     except Exception:
+        subprocess.run(VPNCMD, shell=True)
+        time.sleep(1)
         bashCommand = 'sudo kill -2 $(cat "$HOME/.openconnect.pid") && rm -f "$HOME/.openconnect.pid"'
         subprocess.run(bashCommand, shell=True)
         time.sleep(1)
-        bashCommand = f"(sleep 15 ; echo '{VPNPASS}') | sudo openconnect {VPNSERVER}:4321 --background --servercert {VPNCERT} --pid-file=$HOME/.openconnect.pid --no-dtls --user={VPNUSER} --passwd-on-stdin"
+        bashCommand = f"(sleep 5 ; echo '{VPNPASS}') | sudo openconnect {VPNSERVER}:4321 --background --servercert {VPNCERT} --pid-file=$HOME/.openconnect.pid --no-dtls --user={VPNUSER} --passwd-on-stdin"
         subprocess.run(bashCommand, shell=True)
         resp = jsonify(connect=2)
         resp.status_code = 200
