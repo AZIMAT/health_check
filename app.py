@@ -17,7 +17,7 @@ VPNPASS = os.getenv('VPNPASS')
 VPNCMD = os.getenv('COMMAND')
 VPNADD = os.getenv('VPNADD')
 
-print(VPNCERT)
+print(VPNADD)
 
 @app.route("/refresh")
 def refresh():
@@ -40,7 +40,7 @@ def refresh():
 
 @app.route("/health")
 def health():
-    conn = httplib.HTTPSConnection("radiojavan.com", timeout=5)
+    conn = httplib.HTTPSConnection(VPNADD, timeout=5)
     bashCommand = "yes q | docker exec -i any-pass occtl -j show events > userx.json; head -n-3 userx.json > user.json"
     subprocess.run(bashCommand, shell=True)
     time.sleep(1)
