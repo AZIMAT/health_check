@@ -15,12 +15,13 @@ VPNCERT = os.getenv('VPNCERT')
 VPNUSER = os.getenv('VPNUSER')
 VPNPASS = os.getenv('VPNPASS')
 VPNCMD = os.getenv('COMMAND')
+VPNADD = os.getenv('VPNADD')
 
 print(VPNCERT)
 
 @app.route("/refresh")
 def refresh():
-    conn = httplib.HTTPSConnection("radiojavan.com", timeout=5)
+    conn = httplib.HTTPSConnection(VPNADD, timeout=5)
     try:
         conn.request("HEAD", "/")
         resp = jsonify(connect=1)
